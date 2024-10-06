@@ -1,15 +1,21 @@
 def call(boolean abortPipeline = false) {
-    echo "Iniciando análisis estático de código"
+    def branchName = env.BRANCH_NAME ?: 'no-branch' 
+
+    echo "Iniciando análisis estático de código en la rama ${branchName}"
     
-    // Timeout de 5 minutos para el análisis
     timeout(time: 5, unit: 'MINUTES') {
-        withSonarQubeEnv('SonarQube') {
-            sh 'echo "Ejecución de las pruebas de calidad de código simulada"'
-        }
+        sh 'echo "Ejecución de las pruebas de calidad de código simulada"'
     }
 
-    // Si el parámetro abortPipeline es true, abortar el pipeline
     if (abortPipeline) {
         error("Abortando el pipeline según configuración.")
+    }
+
+    if (branchName == 'master') {
+        error("Abortando el pipeline en la rama master.")
+    } else if (branchName.startsWith('hotfix')) {
+        error("Abortando el pipeline en la rama hotfix.")
+    } else {
+        echo "El pipeline continuará en la rama ${branchName}."
     }
 }
